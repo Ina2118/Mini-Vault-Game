@@ -1,31 +1,32 @@
-import { Container, Sprite } from "pixi.js";
+import { Container} from "pixi.js";
 import { centerObjects } from "../utils/misc";
 import type AssetLoader from "../core/AssetLoader";
-import Shine from "./Shine";
+import Shine  from "./Shine";
 
 export default class Treasure extends Container {
-  private treasureSprite: Sprite;
-  private shine?: Shine;
+  private shines: Shine[] = [];
 
   constructor(
     assetLoader: AssetLoader,
     textureName: string,
-    shineTexture?: string,
     scaleFactor = 1
   ) {
     super();
 
-    this.treasureSprite = new Sprite(
-      assetLoader.getTexture(textureName)
-    );
-    this.treasureSprite.anchor.set(0.5);
+    // Добавяне glitter ефекти на съкровището
+    const positions = [
+      { x: -140, y: -40, scale: 0.8 }, 
+      { x: -10, y: 90, scale: 1.2 },  
+      { x: 120, y: -20, scale: 0.9 } 
+    ];
 
-    this.addChild(this.treasureSprite);
-
-    if (shineTexture) {
-      this.shine = new Shine(assetLoader, shineTexture, scaleFactor);
-      this.addChild(this.shine);
-    }
+    positions.forEach(pos => {
+      const shine = new Shine(assetLoader, textureName, pos.scale);
+      shine.x = pos.x;
+      shine.y = pos.y;
+      this.addChild(shine);
+      this.shines.push(shine);
+    });
 
     this.scale.set(scaleFactor);
     centerObjects(this);
@@ -40,10 +41,7 @@ export default class Treasure extends Container {
 
   reveal() {
     this.visible = true;
-
-    if (this.shine) {
-      this.shine.show(0.4, 6);
-    }
+    this.shines.forEach(shine => shine.show(Math.random() * 0.5 + 0.5, -1));
   }
 
   hide() {

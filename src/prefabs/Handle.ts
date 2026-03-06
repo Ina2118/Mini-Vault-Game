@@ -4,6 +4,10 @@ import gsap from "gsap";
 
 import type AssetLoader from "../core/AssetLoader";
 
+export const EVENTS = {
+    TURN: "turn",
+};
+
 export default class Handle extends Container {
     name = "Handle";
 
@@ -25,7 +29,8 @@ export default class Handle extends Container {
         this.handleSprite = new Sprite(assetLoader.getTexture(handleTexture));
         this.shadowSprite = new Sprite(assetLoader.getTexture(shadowTexture));
 
-        this.handleSprite.x = 35;
+        // Позиционираме дръжката и сенката така, че да са в центъра на контейнера
+        this.handleSprite.x = -30;
         this.handleSprite.y = 0;
 
         this.shadowSprite.x = this.handleSprite.x + 5;
@@ -45,7 +50,7 @@ export default class Handle extends Container {
         this.handleSprite.on("pointerdown", (e) => {
             const localPos = e.data.getLocalPosition(this);
             const direction = localPos.x > 0 ? 1 : -1;
-            this.emit('turn', direction);
+            this.emit(EVENTS.TURN, direction);
         });
     }
 
@@ -56,68 +61,64 @@ export default class Handle extends Container {
 
     public rotate(direction: number) : Promise<void> {
         this.rotationAngle += direction * 60;
-        const targetRadians = this.rotationAngle * (Math.PI / 180);
-
-        gsap.to(this.handleSprite, {
-            rotation: targetRadians,
-            duration: 1,
-            ease: this.easeIn,
-        });
 
         return new Promise((resolve) => {
-        gsap.to(this.shadowSprite, {
-            rotation: targetRadians,
-            duration: 1,
-            ease: this.easeIn,
-            onComplete: () => resolve(),
+            gsap.to([this.handleSprite, this.shadowSprite],{
+                angle: this.rotationAngle,
+                //анимацията на сянката също да не блокира, но да е синхронизирана с дръжката
+                duration: 0.5,
+                ease: this.easeIn,
+                overwrite: "auto",
+                onComplete: () => resolve(),
         });
     });
 
     }
 
     public async reset() {
-        const timeline = gsap.timeline();
-        const targetRadians = (this.rotationAngle + 960) * (Math.PI / 180);
+        
+        const targetAngle = this.rotationAngle + 960;
 
-        timeline.to(this.handleSprite, {
-            rotation: targetRadians,
+       await gsap.to([this.handleSprite, this.shadowSprite], {
+            angle: targetAngle,
             duration: 1,
             ease: this.easeIn,
         });
 
-        timeline.to(this.shadowSprite, {
-           rotation: targetRadians,
-            duration: 1,
-            ease: this.easeIn,
-        }, 0); 
-
-        await timeline;
-
         this.rotationAngle = 0;
-        this.handleSprite.rotation = 0;
-        this.shadowSprite.rotation = 0;
+        this.handleSprite.angle = 0;
+        this.shadowSprite.angle = 0;
     }
 
     public async spinCrazy(): Promise<void> {
         const timeline = gsap.timeline();
         
-        const wobble1 = (this.rotationAngle + 30) * (Math.PI / 180);
-        const wobble2 = (this.rotationAngle - 45) * (Math.PI / 180);
-        const wobble3 = (this.rotationAngle + 10) * (Math.PI / 180);
-        const finalTarget = 0;
+        const crazySpin = this.rotationAngle + 1080;
+        const backToZero = 0;
 
-        timeline.to(this.handleSprite, { rotation: wobble1, duration: 0.1, ease: "power1.inOut" })
-                .to(this.handleSprite, { rotation: wobble2, duration: 0.1, ease: "power1.inOut" })
-                .to(this.handleSprite, { rotation: wobble3, duration: 0.1, ease: "power1.inOut" })
-                .to(this.handleSprite, { rotation: finalTarget, duration: 0.2, ease: "power2.out" });
+        timeline.to([this.handleSprite, this.shadowSprite], {
+            angle: crazySpin,
+            duration: 0.3,
+            ease: "power2.in",
+        })
 
-        timeline.to(this.shadowSprite, { rotation: wobble1, duration: 0.1, ease: "power1.inOut" }, 0)
-                .to(this.shadowSprite, { rotation: wobble2, duration: 0.1, ease: "power1.inOut" }, 0.1)
-                .to(this.shadowSprite, { rotation: wobble3, duration: 0.1, ease: "power1.inOut" }, 0.2)
-                .to(this.shadowSprite, { rotation: finalTarget, duration: 0.2, ease: "power2.out" }, 0.3);
+        .to([this.handleSprite, this.shadowSprite], {
+            angle: backToZero,
+            duration: 0.5,
+            ease: "elastic.out(1, 0.4)",
+        });
 
         await timeline;
         
         this.rotationAngle = 0;
+    }
+
+    public async fadeIn(): Promise<void> {
+        this.visible = true;
+        this.alpha = 0;
+        await gsap.to(this, {
+            alpha: 1,
+            duration: 1,
+        });
     }
 }

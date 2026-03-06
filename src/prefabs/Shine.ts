@@ -12,6 +12,7 @@ export default class Shine extends Container {
     this.shineSprite = new Sprite(assetLoader.getTexture(textureName));
     this.shineSprite.anchor.set(0.5);
     this.shineSprite.alpha = 0; 
+    this.shineSprite.blendMode = 'add';
 
     this.addChild(this.shineSprite);
 

@@ -2,11 +2,15 @@ import { Container } from "pixi.js";
 import type { SceneUtils } from "../core/App";
 
 import { Background } from "../prefabs/Background";
-import Door from "../prefabs/Doors";
+// Оправен импорт след поправката на typo в името на файла за класа Door - Doors
+import Door from "../prefabs/Door";
 import Handle from "../prefabs/Handle";
 import Treasure from "../prefabs/Treasure";
+import { wait } from "../utils/misc"; 
 
-import gsap from "gsap";
+export const EVENTS = {
+  TURN: "turn",
+};
 
 export default class Game extends Container {
   private assetLoader: SceneUtils["assetLoader"];
@@ -50,14 +54,13 @@ export default class Game extends Container {
     this.treasure = new Treasure(
       this.assetLoader,
       "shine",
-      undefined,
       1
     );
     this.addChild(this.treasure);
 
     
     this.handle = new Handle(this.assetLoader, "doorHandle", "doorHandleShadow", 1);
-    this.handle.on("turn", (direction: number) => this.onHandleTurn(direction));
+    this.handle.on(EVENTS.TURN, (direction: number) => this.onHandleTurn(direction));
     this.addChild(this.handle);
 
     this.layout();
@@ -84,17 +87,11 @@ export default class Game extends Container {
     this.generateCombination();
   }
 
-  update(_delta: number) {
-    
-  }
-
   private async onHandleTurn(direction: number) {
     if (this.unlocked || this.isAnimating) return;
 
-    this.isAnimating = true;
-
-    
-    await this.handle.rotate(direction);
+    //анимация на дръжката да не блокира
+    this.handle.rotate(direction);
 
     
     const activePair = this.secretCombo[this.currentPairIndex];
@@ -119,26 +116,23 @@ export default class Game extends Container {
             this.isAnimating = false;
         }
     } else {
-       
+      //За да блокира дръжката при win 
+       this.isAnimating = true;
         await this.onError();
     }
   }
 
   private async onSuccess() {
       this.unlocked = true;
-      this.door.open();
-      this.handle.visible = false;
       this.treasure.reveal();
+      this.handle.visible = false;
+      await this.door.open();
 
-      
-      await new Promise<void>(resolve => {
-        gsap.delayedCall(5, () => resolve());
-      });
+     await wait(5);
 
-     
-      this.door.close();
-      this.handle.visible = true;
       this.treasure.hide();
+      this.handle.fadeIn();
+      await this.door.close();
       this.unlocked = false;
       this.isAnimating = false;
       

@@ -40,11 +40,6 @@ export default class App {
 
     window.addEventListener("resize", this.onResize);
 
-    
-    this.ticker.add((ticker) => {
-      const delta = ticker.deltaMS / (1000 / 60); 
-      this.game.update(delta);
-    });
   }
 
   private onResize = (_ev: UIEvent) => {
