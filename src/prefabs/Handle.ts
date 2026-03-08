@@ -1,5 +1,4 @@
 import { Container, Sprite } from "pixi.js";
-import { centerObjects } from "../utils/misc";
 import gsap from "gsap";
 
 import type AssetLoader from "../core/AssetLoader";
@@ -42,8 +41,6 @@ export default class Handle extends Container {
 
         this.addChild(this.shadowSprite, this.handleSprite);
 
-        centerObjects(this);
-
         this.handleSprite.eventMode = "static";
         this.handleSprite.cursor = "pointer";
 
@@ -54,10 +51,7 @@ export default class Handle extends Container {
         });
     }
 
-    resize(_width: number, scaleFactor: number) {
-        this.scale.set(scaleFactor);
-        centerObjects(this);
-    }
+
 
     public rotate(direction: number) : Promise<void> {
         this.rotationAngle += direction * 60;

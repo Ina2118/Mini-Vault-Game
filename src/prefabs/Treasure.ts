@@ -1,5 +1,4 @@
 import { Container} from "pixi.js";
-import { centerObjects } from "../utils/misc";
 import type AssetLoader from "../core/AssetLoader";
 import Shine  from "./Shine";
 
@@ -29,14 +28,8 @@ export default class Treasure extends Container {
     });
 
     this.scale.set(scaleFactor);
-    centerObjects(this);
 
     this.visible = false;
-  }
-
-  resize(_width: number, scaleFactor: number) {
-    this.scale.set(scaleFactor);
-    centerObjects(this);
   }
 
   reveal() {

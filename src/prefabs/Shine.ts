@@ -1,6 +1,5 @@
 import { Container, Sprite } from "pixi.js";
 import { gsap } from "gsap";
-import { centerObjects } from "../utils/misc";
 import type AssetLoader from "../core/AssetLoader";
 
 export default class Shine extends Container {
@@ -17,12 +16,6 @@ export default class Shine extends Container {
     this.addChild(this.shineSprite);
 
     this.scale.set(scaleFactor);
-    centerObjects(this);
-  }
-
-  resize(_width: number, scaleFactor: number) {
-    this.scale.set(scaleFactor);
-    centerObjects(this);
   }
 
 

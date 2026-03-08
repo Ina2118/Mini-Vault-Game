@@ -40,13 +40,14 @@ export default class App {
 
     window.addEventListener("resize", this.onResize);
 
+    this.onResize({} as UIEvent);
   }
 
-  private onResize = (_ev: UIEvent) => {
+  private onResize = (_ev?: UIEvent) => {
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    if (typeof (this.game as any).onResize === "function") {
+    if (this.game && typeof (this.game as any).onResize === "function") {
       (this.game as any).onResize(width, height);
     }
   };

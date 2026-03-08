@@ -1,5 +1,4 @@
 import { Container, Sprite } from "pixi.js";
-import { centerObjects } from "../utils/misc";
 import type AssetLoader from "../core/AssetLoader";
 import gsap from "gsap";
 
@@ -38,13 +37,6 @@ export default class Door extends Container {
     this.addChild(this.closedSprite, this.openContainer);
     // Паннтите са от дясно, махнала съм '-' scaleFactor за да се отваря в дясно
     this.scale.set(scaleFactor, scaleFactor);
-
-    centerObjects(this);
-  }
-
-  resize(_width: number, scaleFactor: number) {
-    this.scale.set(scaleFactor, scaleFactor);
-    centerObjects(this);
   }
 
   //За анимацията на вратата fade in/out
